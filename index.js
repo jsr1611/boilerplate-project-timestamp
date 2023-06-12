@@ -24,23 +24,43 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
-app.get("/api/:timeData", function(req, res){
-  let data = req.params.timeData;
-  let unix = "";
-  console.log(data);
-  if(data.includes("-")){
-    unix = new Date(data).getTime();
-    data = new Date(data).toUTCString();
-  }else{
-    unix = data;
-    data = new Date(Number(data)).toUTCString();
+
+app.get("/api", function(req, res){
+  let date = new Date();
+  res.json({unix: date.getTime(), utc: date.toUTCString()});
+})
+
+app.get("/api/:date", function(req, res){
+  let unix = new Date().getTime();
+  let data = req.params.date;
+  let test;
+  if(data.includes("-") && data.length === 10){
+      test = new Date(data);  
+      unix = test.getTime();
+      data = test.toUTCString();
+    res.json({unix: unix, utc: data});
   }
-  res.json({unix: unix, utc: data});
+  else if((data - 0) == data && (''+data).trim().length > 0){
+    unix = Number(data);
+    data = new Date(Number(data)).toUTCString();
+    res.json({unix: unix, utc: data});
+  }
+  else{
+    test = new Date(data);
+    if(test == 'Invalid Date'){
+      res.json({error: 'Invalid Date'});
+    }
+    else{
+      unix = test.getTime();
+      data = test.toUTCString();
+    res.json({unix: unix, utc: data});
+    }
+  }
 });
 
 
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
+var listener = app.listen(3001, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
